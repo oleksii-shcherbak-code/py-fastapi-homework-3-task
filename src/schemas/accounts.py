@@ -1,9 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
-from database.validators import accounts as accounts_validators
 
-
-class MessageResponseSchema(BaseModel):
-    message: str
+from database.validators.accounts import validate_password_strength
 
 
 class UserRegistrationRequestSchema(BaseModel):
@@ -12,41 +9,31 @@ class UserRegistrationRequestSchema(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def validate_password(cls, v: str) -> str:
-        return accounts_validators.validate_password_strength(v)
-
-    @field_validator("email")
-    @classmethod
-    def validate_email(cls, v: str) -> str:
-        return accounts_validators.validate_email(v)
+    def password_strength(cls, value: str) -> str:
+        validate_password_strength(value)
+        return value
 
 
 class UserRegistrationResponseSchema(BaseModel):
     id: int
     email: EmailStr
 
-    class Config:
-        from_attributes = True
 
-
-class UserActivationRequestSchema(BaseModel):
+class ActivateAccountRequestSchema(BaseModel):
     email: EmailStr
     token: str
 
 
-class UserLoginRequestSchema(BaseModel):
-    email: EmailStr
-    password: str
-
-
-class UserLoginResponseSchema(BaseModel):
-    access_token: str
-    refresh_token: str
-    token_type: str = "bearer"
+class ActivateAccountResponseSchema(BaseModel):
+    message: str
 
 
 class PasswordResetRequestSchema(BaseModel):
     email: EmailStr
+
+
+class PasswordResetRequestResponseSchema(BaseModel):
+    message: str
 
 
 class PasswordResetCompleteRequestSchema(BaseModel):
@@ -56,13 +43,39 @@ class PasswordResetCompleteRequestSchema(BaseModel):
 
     @field_validator("password")
     @classmethod
-    def validate_new_password(cls, v: str) -> str:
-        return accounts_validators.validate_password_strength(v)
+    def password_strength(cls, value: str) -> str:
+        validate_password_strength(value)
+        return value
 
 
-class TokenRefreshRequestSchema(BaseModel):
+class PasswordResetCompleteResponseSchema(BaseModel):
+    message: str
+
+
+class LoginRequestSchema(BaseModel):
+    email: EmailStr
+    password: str
+
+
+class LoginResponseSchema(BaseModel):
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
+
+
+class RefreshAccessTokenRequestSchema(BaseModel):
     refresh_token: str
 
 
-class TokenRefreshResponseSchema(BaseModel):
+class RefreshAccessTokenResponseSchema(BaseModel):
     access_token: str
+
+
+UserActivationRequestSchema = ActivateAccountRequestSchema
+MessageResponseSchema = ActivateAccountResponseSchema
+
+UserLoginRequestSchema = LoginRequestSchema
+UserLoginResponseSchema = LoginResponseSchema
+
+TokenRefreshRequestSchema = RefreshAccessTokenRequestSchema
+TokenRefreshResponseSchema = RefreshAccessTokenResponseSchema
