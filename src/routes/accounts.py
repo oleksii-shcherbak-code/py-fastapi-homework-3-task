@@ -205,7 +205,7 @@ async def login(
         raise HTTPException(status_code=500, detail="An error occurred while processing the request.")
 
 
-@router.post("/refresh/", response_model=TokenRefreshResponseSchema, status_code=status.HTTP_200_OK)
+@router.post("/api/v1/accounts/refresh/", response_model=TokenRefreshResponseSchema, status_code=status.HTTP_200_OK)
 async def refresh_token(
         data: TokenRefreshRequestSchema,
         db: AsyncSession = Depends(get_db),
